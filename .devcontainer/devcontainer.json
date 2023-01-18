@@ -23,8 +23,8 @@
 	"mounts": [
 	 	"source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind",
 		// Better read/write performance during compilation.
-		"source=try-rust-target,target=${containerWorkspaceFolder}/bacnet-agent/target,type=volume",
-		"source=try-rust-target,target=${containerWorkspaceFolder}/bacnet-stack-wrapper/target,type=volume"
+		// "source=try-rust-target,target=${containerWorkspaceFolder}/bacnet-agent/target,type=volume",
+		// "source=try-rust-target,target=${containerWorkspaceFolder}/bacnet-stack-wrapper/target,type=volume"
 	],	
 	// Comment out to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
 	

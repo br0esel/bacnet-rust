@@ -22,6 +22,9 @@ ENV CROSS_CONTAINER_IN_CONTAINER=true
     #  cmake \
     #  gdb \
     docker.io \
+    llvm-dev \
+    libclang-dev \
+    clang \
     # docker-compose \
     #  ninja-build \
     #  gcc-arm-linux-gnueabihf \

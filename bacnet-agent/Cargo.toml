@@ -9,6 +9,7 @@ edition = "2021"
 # bacnet-stack-wrapper = { path = "../bacnet-stack-wrapper"}
 serde_json = "1.0.91"
 bindgen = "0.63.0"
+bacnet-stack-wrapper ={ path = "../bacnet-stack-wrapper" }
 
 [build-dependencies]
 bindgen = "0.63.0"

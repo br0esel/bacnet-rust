@@ -1,7 +1,43 @@
+use std::{path::PathBuf, env};
+
 extern crate bindgen;
 
 fn main() {
     // println!("cargo:rustc-link-lib=bz2");
+    println!("cargo:rerun-if-changed=wrapper.h");
+     compile_bacnet_lib();
+    create_bacnet_wrapper();
+}
+
+fn create_bacnet_wrapper() {
+    let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
+
+    let bindings = bindgen::Builder::default()
+        .header("wrapper.h")
+        // .clang_arg("-F/usr/lib/gcc/x86_64-linux-gnu/9/include")
+        .clang_arg("-F../bacnet-stack/src")
+        .clang_arg("-Wno-sign-compare")
+        // .clang_arg("-I../bacnet-stack/src")
+        .blocklist_item("FP_INFINITE")
+        .blocklist_item("FP_NAN")
+        .blocklist_item("FP_ZERO")
+        .blocklist_item("FP_NORMAL")
+        .blocklist_item("FP_SUBNORMAL")
+        .generate()
+        .expect("Unable to generate bindings");
+
+    bindings
+        .write_to_file(out_path.join("bindings.rs"))
+        .expect("Couldn't write bindings!");
+}
+
+fn compile_bacnet_lib() {
+    let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
+
+    let lib_path = out_path.join("libbacnet-stack-lib.a");
+    let lib_path_str = lib_path.into_os_string().into_string().unwrap();
+
+    println!("cargo:rustc-link-lib={}",lib_path_str);
 
     let src_files = vec![
         "../bacnet-stack/src/bacnet/abort.c",
@@ -350,28 +386,27 @@ fn main() {
     ];
 
     let ports_files = vec![
-        "../bacnet-stack/ports/linux/bacport.h",
+        // "../bacnet-stack/ports/linux/bacport.h",
         "../bacnet-stack/ports/linux/datetime-init.c",
         "../bacnet-stack/ports/linux/bip-init.c",
         "../bacnet-stack/ports/linux/mstimer-init.c",
     ];
 
-    println!("------------------------------ build ---------------------------------");
     let mut temp = cc::Build::new();
 
     temp
-        .define("BACNET_STACK_BUILD_APPS", None)     // "build apps"
-        .define("BAC_ROUTING", None)                 // "enable bac routing"
-        .define("BACNET_PROPERTY_LISTS", None)       // "enable property lists"
+        .define("BACNET_STACK_BUILD_APPS", "1")     // "build apps"
+        .define("BAC_ROUTING", "1")                 // "enable bac routing"
+        .define("BACNET_PROPERTY_LISTS", "1")       // "enable property lists"
         //.define("BACNET_BUILD_PIFACE_APP", "OFF")                     // "compile the piface app"
-        .define("BACNET_BUILD_BACPOLL_APP", None)   // "compile the bacpoll app"
+        .define("BACNET_BUILD_BACPOLL_APP", "1")   // "compile the bacpoll app"
         //.define("BACDL_ETHERNET", "OFF")                              // "compile with ethernet support"
         //.define("BACDL_MSTP", "OFF")                                  // "compile with mstp support"
         //.define("BACDL_ARCNET", "OFF")                                // "compile with arcnet support"
-        .define("BACDL_BIP", None)                            // "compile with ip support"
+        .define("BACDL_BIP", "1")                            // "compile with ip support"
         //.define("BACDL_BIP6", "OFF")                                  // "compile with ipv6 support"
         //.define("BACDL_NONE", "OFF")                                  // "compile without datalink"
-        .define("PRINT_ENABLED",None);
+        .define("PRINT_ENABLED","1");
 
     temp.include("../bacnet-stack/src");
 
@@ -385,36 +420,6 @@ fn main() {
     for file in ports_files {
         temp.file(file);
     }
-
+    // temp.static_flag(true);
     temp.compile("bacnet-stack-lib");
-
-    
-    // .compile("foo");
-    // let output = std::process::Command::new("make")
-    //     .current_dir("./../bacnet-stack")
-    //     .spawn()
-    //     // .output()
-    //     .expect("makefile failed");
-
-    // println!("status: {}", output.);
-    // io::stdout().write_all(&output.stdout).unwrap();
-    // io::stderr().write_all(&output.stderr).unwrap();
-
-    // let bindings = bindgen::Builder::default()
-    //     .header("wrapper.h")
-    //     // .clang_arg("-F/usr/lib/gcc/x86_64-linux-gnu/9/include")
-    //     // .clang_arg("-Fbacnet-stack/src")
-    //     .clang_arg("-Ibacnet-stack/src")
-    //     .blocklist_item("FP_INFINITE")
-    //     .blocklist_item("FP_NAN")
-    //     .blocklist_item("FP_ZERO")
-    //     .blocklist_item("FP_NORMAL")
-    //     .blocklist_item("FP_SUBNORMAL")
-    //     .generate()
-    //     .expect("Unable to generate bindings");
-
-    // let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
-    // bindings
-    //     .write_to_file(out_path.join("bindings.rs"))
-    //     .expect("Couldn't write bindings!");
 }
