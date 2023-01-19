@@ -23,6 +23,12 @@ fn create_bacnet_wrapper() {
         .blocklist_item("FP_ZERO")
         .blocklist_item("FP_NORMAL")
         .blocklist_item("FP_SUBNORMAL")
+        .blocklist_file("stdlib.h")
+        .blocklist_file("stdio.h")
+        .blocklist_file("math.h")
+        .blocklist_file("string.h")
+        .blocklist_file("stddef.h")
+        .blocklist_file("stdint.h")
         .generate()
         .expect("Unable to generate bindings");
 
@@ -32,14 +38,9 @@ fn create_bacnet_wrapper() {
 }
 
 fn compile_bacnet_lib() {
-    let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
+    
 
-    let lib_path = out_path.join("libbacnet-stack-lib.a");
-    let lib_path_str = lib_path.into_os_string().into_string().unwrap();
-
-    println!("cargo:rustc-link-lib={}",lib_path_str);
-
-    let src_files = vec![
+    let mut src_files = vec![
         "../bacnet-stack/src/bacnet/abort.c",
         //"../bacnet-stack/src/bacnet/abort.h",
         "../bacnet-stack/src/bacnet/access_rule.c",
@@ -130,7 +131,7 @@ fn compile_bacnet_lib() {
         //"../bacnet-stack/src/bacnet/basic/object/color_object.h",
         "../bacnet-stack/src/bacnet/basic/object/color_temperature.c",
         //"../bacnet-stack/src/bacnet/basic/object/color_temperature.h",
-        "../bacnet-stack/src/bacnet/basic/object/client/device-client.c",
+        // "../bacnet-stack/src/bacnet/basic/object/client/device-client.c",
         "../bacnet-stack/src/bacnet/basic/object/command.c",
         //"../bacnet-stack/src/bacnet/basic/object/command.h",
         "../bacnet-stack/src/bacnet/basic/object/credential_data_input.c",
@@ -385,6 +386,8 @@ fn compile_bacnet_lib() {
         //"../bacnet-stack/src/bacnet/wpm.h",
     ];
 
+    src_files.push("../bacnet-stack/src/bacnet/basic/object/gateway/gw_device.c");
+
     let ports_files = vec![
         // "../bacnet-stack/ports/linux/bacport.h",
         "../bacnet-stack/ports/linux/datetime-init.c",
@@ -392,34 +395,43 @@ fn compile_bacnet_lib() {
         "../bacnet-stack/ports/linux/mstimer-init.c",
     ];
 
-    let mut temp = cc::Build::new();
+    let mut builder = cc::Build::new();
 
-    temp
-        .define("BACNET_STACK_BUILD_APPS", "1")     // "build apps"
-        .define("BAC_ROUTING", "1")                 // "enable bac routing"
-        .define("BACNET_PROPERTY_LISTS", "1")       // "enable property lists"
+    builder
+        // .define("BACNET_STACK_BUILD_APPS", None)     // "build apps"
+        .define("BAC_ROUTING", None)                 // "enable bac routing"
+        .define("BACNET_PROPERTY_LISTS", None)       // "enable property lists"
         //.define("BACNET_BUILD_PIFACE_APP", "OFF")                     // "compile the piface app"
-        .define("BACNET_BUILD_BACPOLL_APP", "1")   // "compile the bacpoll app"
+        .define("BACNET_BUILD_BACPOLL_APP", None)   // "compile the bacpoll app"
         //.define("BACDL_ETHERNET", "OFF")                              // "compile with ethernet support"
         //.define("BACDL_MSTP", "OFF")                                  // "compile with mstp support"
         //.define("BACDL_ARCNET", "OFF")                                // "compile with arcnet support"
-        .define("BACDL_BIP", "1")                            // "compile with ip support"
+        .define("BACDL_BIP", None)                            // "compile with ip support"
         //.define("BACDL_BIP6", "OFF")                                  // "compile with ipv6 support"
         //.define("BACDL_NONE", "OFF")                                  // "compile without datalink"
-        .define("PRINT_ENABLED","1");
+        .define("PRINT_ENABLED",None)
+        .define("BACNET_STACK_STATIC_DEFINE", None)
+        .define("BACNET_PROTOCOL_REVISION", "19");
 
-    temp.include("../bacnet-stack/src");
+    builder.include("../bacnet-stack/src");
 
     for file in src_files {
-        temp.file(file);
+        builder.file(file);
     }
 
-    temp.include("../bacnet-stack/src/bacnet/datalink")
+    builder.include("../bacnet-stack/src/bacnet/datalink")
         .include("../bacnet-stack/ports/linux");
 
     for file in ports_files {
-        temp.file(file);
+        builder.file(file);
     }
-    // temp.static_flag(true);
-    temp.compile("bacnet-stack-lib");
+    builder.compile("bacnet");
+
+    let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
+
+    // let lib_path = out_path.join("libbacnet.a").into_os_string().into_string().unwrap();
+    // let lib_path_str = lib_path.into_os_string().into_string().unwrap();
+
+    // println!("cargo:rustc-link-search={}",out_path.into_os_string().into_string().unwrap());
+    // println!("cargo:rustc-link-lib=bacnet");
 }
