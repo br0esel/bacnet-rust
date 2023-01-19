@@ -10,7 +10,3 @@ edition = "2021"
 [build-dependencies]
 cc = "1.0.78"
 bindgen = "0.63.0"
-
-# [lib]
-# name = "bacnetstackwrapper"
-# crate-type = ["staticlib"]

@@ -21,6 +21,7 @@ ENV CROSS_CONTAINER_IN_CONTAINER=true
     #  pkg-config \
     #  cmake \
     #  gdb \
+    crossbuild-essential-arm64 \
     docker.io \
     llvm-dev \
     libclang-dev \

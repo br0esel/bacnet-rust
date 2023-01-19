@@ -13,3 +13,4 @@ bacnet-stack-wrapper ={ path = "../bacnet-stack-wrapper" }
 
 [build-dependencies]
 bindgen = "0.63.0"
+
