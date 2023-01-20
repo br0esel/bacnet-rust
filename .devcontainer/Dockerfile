@@ -26,6 +26,7 @@ ENV CROSS_CONTAINER_IN_CONTAINER=true
     llvm-dev \
     libclang-dev \
     clang \
+    docker-compose \
     # docker-compose \
     #  ninja-build \
     #  gcc-arm-linux-gnueabihf \
@@ -34,6 +35,6 @@ ENV CROSS_CONTAINER_IN_CONTAINER=true
      #gcc-10-arm-linux-gnueabihf \
      #g++-10-arm-linux-gnueabihf
     make
-
+    RUN chmod 666 /var/run/docker.sock
 # RUN usermod -aG docker vscode
 # RUN chown vscode /var/run/docker.sock
