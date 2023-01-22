@@ -17,7 +17,8 @@
 		"ghcr.io/devcontainers/features/rust:1": {},
 		// "ghcr.io/devcontainers/features/docker-in-docker:2": {},		
 	},
-	"postCreateCommand": "cargo install cross",
+	// "postCreateCommand": "cargo install cross",
+	"postCreateCommand": "sudo chmod 666 /var/run/docker.sock",
 
 	// "remoteUser": "vscode",
 	"mounts": [
